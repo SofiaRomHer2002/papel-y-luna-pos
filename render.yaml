@@ -1,7 +1,6 @@
-# Subir el CONTENIDO de papel-y-luna-pos a la raÃ­z del repositorio.
 databases:
   - name: papelyluna-db
-    plan: 0.1c-256mb
+    plan: free
     postgresMajorVersion: "16"
     ipAllowList: []
     databaseName: papelyluna
@@ -11,7 +10,7 @@ services:
   - type: web
     name: papelyluna-api
     runtime: python
-    plan: 0.5c-512mb
+    plan: free
     rootDir: backend
     buildCommand: bash build.sh
     preDeployCommand: python manage.py migrate --noinput
