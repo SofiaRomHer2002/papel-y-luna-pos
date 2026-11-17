@@ -48,7 +48,7 @@ def buscar_usuario_de_la_peticion(request):
 
     token = encabezado[len("Bearer "):].strip()
     sesion = Sesion.objects.select_related("usuario").filter(token=token).first()
-    if sesion is None:
+    if sesion is None or not sesion.usuario.is_active:
         return None
 
     # Si la sesión ya venció, la borramos y pedimos iniciar sesión otra vez

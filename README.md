@@ -1,4 +1,4 @@
-> **Render:** consulta [DESPLIEGUE_RENDER.md](DESPLIEGUE_RENDER.md) para desplegar la API con PostgreSQL y conectar GitHub Pages.
+> **Render:** consulta [DESPLIEGUE_RENDER.md](DESPLIEGUE_RENDER.md) para desplegar Django, PostgreSQL y el Static Site, o conectar GitHub Pages.
 
 # Papel y Luna — POS (Entrega final, MVP 3)
 
@@ -23,6 +23,9 @@ La aplicación está pensada para usarse sobre todo **desde el celular**, y vari
 
 Los crea el script de inicialización (`python manage.py inicializar_datos`). Las contraseñas
 se guardan cifradas en la base de datos. El usuario distingue mayúsculas y minúsculas.
+Solo se crean usuarios ausentes: repetir el comando no cambia claves, roles ni estado activo.
+Puedes definir claves iniciales privadas mediante `INITIAL_ADMIN_PASSWORD` e
+`INITIAL_CASHIER_PASSWORD`; la recuperación explícita está documentada en la guía de Render.
 
 ## Cómo ejecutarlo
 

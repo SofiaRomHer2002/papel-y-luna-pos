@@ -10,16 +10,15 @@
 // es el usuario y qué rol tiene.
 // ---------------------------------------------------------------------------
 import { TIEMPO_MAXIMO_ESPERA } from "../config.js";
+import { resolverApiUrl } from "./direccion.js";
 
 // Dirección del backend.
 //  - Al publicar la aplicación se define en la variable VITE_API_URL (archivo .env).
 //  - En desarrollo, si no está definida, usamos el mismo computador donde se abrió
 //    la página, en el puerto 8000 (así también funciona al probar desde el celular).
-let direccion = "http://" + window.location.hostname + ":8000/api";
-if (import.meta.env.VITE_API_URL) {
-  direccion = import.meta.env.VITE_API_URL;
-}
-export const API_URL = direccion;
+export const API_URL = resolverApiUrl(
+  import.meta.env.VITE_API_URL, import.meta.env.DEV, window.location.hostname
+);
 
 // ----- Token de la sesión -----
 // El token se guarda en localStorage para que la sesión se mantenga al recargar la página.
@@ -112,8 +111,8 @@ async function enviar(metodo, ruta, datos) {
   }
 
   // 401 = la sesión venció o el token no sirve: volvemos a la pantalla de inicio de sesión.
-  // (En la ruta /sesion un 401 solo significa "usuario o contraseña incorrectos".)
-  if (respuesta.status === 401 && ruta !== "/sesion") {
+  // En POST /sesion un 401 significa "usuario o contraseña incorrectos".
+  if (respuesta.status === 401 && !(ruta === "/sesion" && metodo === "POST")) {
     borrarToken();
     if (avisarSesionVencida) {
       avisarSesionVencida();

@@ -55,9 +55,9 @@ INSTALLED_APPS = [
 
 # Los "middleware" son pasos por los que pasa cada petición antes de llegar al controlador
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",  # también cubre respuestas de seguridad y estáticos
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    "corsheaders.middleware.CorsMiddleware",  # agrega los encabezados CORS a las respuestas
     "django.middleware.common.CommonMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -111,11 +111,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # ----- CORS: quién puede llamar a la API desde el navegador -----
 # En desarrollo se permite cualquier origen. Al desplegar se puede limitar con la
 # variable CORS_ORIGENES (por ejemplo: https://usuario.github.io).
-ORIGENES = os.environ.get("CORS_ORIGENES", "")
-if ORIGENES == "":
+ORIGENES = os.environ.get("CORS_ORIGENES", "").strip()
+if not ORIGENES:
     CORS_ALLOW_ALL_ORIGINS = DEBUG
 else:
-    CORS_ALLOWED_ORIGINS = [origin.strip() for origin in ORIGENES.split(",") if origin.strip()]
+    CORS_ALLOWED_ORIGINS = [origin.strip().rstrip("/") for origin in ORIGENES.split(",") if origin.strip()]
 
 # ----- Reglas del negocio que usa el backend -----
 TASA_IVA = 0.19          # 19 % de IVA, igual que en el MVP 1 y el MVP 2
