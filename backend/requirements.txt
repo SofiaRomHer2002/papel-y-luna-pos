@@ -1,0 +1,10 @@
+# Dependencias del backend. Se instalan con:  pip install -r requirements.txt
+Django>=5.2,<6.0          # el framework del backend
+psycopg[binary]>=3.2      # conector para que Django hable con PostgreSQL
+django-cors-headers>=4.4  # permite que el frontend (otro origen) llame a la API
+python-dotenv>=1.0        # lee el archivo .env con los datos de conexión
+
+# Despliegue en Render (se conserva el conector psycopg 3 existente).
+gunicorn>=23,<24
+dj-database-url>=2.3,<4
+whitenoise>=6.8,<7

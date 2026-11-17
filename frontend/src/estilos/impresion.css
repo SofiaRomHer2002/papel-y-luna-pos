@@ -1,0 +1,54 @@
+/* ---------------------------------------------------------------------------
+   impresion.css: reglas que SOLO se aplican al imprimir o al guardar como PDF
+   (botón "Imprimir / guardar PDF" de la factura).
+   Truco: se oculta TODO lo que hay en pantalla y se vuelve a mostrar únicamente
+   la factura (.factura-imprimible), acomodada en la esquina de la hoja.
+   --------------------------------------------------------------------------- */
+@media print {
+  /* 1. Ocultamos todo... */
+  body * {
+    visibility: hidden;
+  }
+
+  /* 2. ...y mostramos solo la factura y lo que hay dentro de ella */
+  .factura-imprimible,
+  .factura-imprimible * {
+    visibility: visible;
+  }
+
+  /* 3. La factura se pega arriba a la izquierda y usa el ancho de la hoja */
+  .factura-imprimible {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: 380px;
+    border: 0;
+    padding: 0;
+  }
+
+  /* 4. La ventana que contiene la factura deja de ser una ventana flotante */
+  .modal-capa {
+    position: static;
+    padding: 0;
+    background: none;
+    animation: none;
+  }
+
+  .modal-caja {
+    max-height: none;
+    overflow: visible;
+    box-shadow: none;
+    animation: none;
+  }
+
+  /* Cualquier botón o aviso marcado con "no-imprimir" desaparece de la hoja */
+  .no-imprimir,
+  .avisos {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff;
+  }
+}

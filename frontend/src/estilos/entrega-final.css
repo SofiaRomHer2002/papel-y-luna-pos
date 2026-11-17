@@ -1,0 +1,472 @@
+/* ---------------------------------------------------------------------------
+   entrega-final.css: estilos de lo que se agregó en la entrega final (MVP 3):
+   inicio de sesión, usuario en el encabezado, descuentos, corrección de ventas,
+   reembolsos, faltantes y reportes.
+   Usa los mismos colores, radios y tipografías de variables.css para que todo
+   se vea igual que el resto de la aplicación. Primero va el diseño para CELULAR
+   y al final las reglas para pantallas más grandes.
+   --------------------------------------------------------------------------- */
+
+/* ======================= INICIO DE SESIÓN ======================= */
+
+/* La pantalla de login ocupa toda la altura y centra la caja */
+.login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 24px 16px;
+  background: var(--hoja);
+}
+
+/* Caja blanca del formulario, con la franja amarilla de la marca arriba */
+.login-caja {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 400px;
+  padding: 28px 22px;
+  border: 1px solid var(--linea);
+  border-top: 6px solid var(--luna);
+  border-radius: var(--radio-grande);
+  background: var(--papel);
+}
+
+.login-cabecera {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.login-logo {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+}
+
+.login-negocio {
+  font-size: 2.2rem;
+}
+
+.login-tipo {
+  color: var(--tinta-suave);
+}
+
+/* ======================= ENCABEZADO: USUARIO Y SALIR ======================= */
+
+/* El título ocupa el espacio libre y empuja la sesión hacia la derecha */
+.encabezado-textos {
+  flex: 1;
+  min-width: 0;
+}
+
+.encabezado-sesion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Nombre de usuario y rol, uno debajo del otro. En celulares angostos se oculta el nombre. */
+.encabezado-usuario {
+  display: none;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+}
+
+.encabezado-usuario-nombre {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.encabezado-usuario-rol {
+  padding: 1px 10px;
+  border-radius: var(--radio-pildora);
+  background: var(--luna-suave);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Opción "Cerrar sesión" del menú Más: icono en rojo suave para distinguirla */
+.menu-mas-salir .menu-mas-icono {
+  background: var(--borrador-suave);
+  color: var(--borrador);
+}
+
+/* ======================= DESCUENTO EN LA VENTA ======================= */
+
+/* Fila del descuento dentro de los totales: en verde, porque es plata a favor del cliente */
+.recibo-descuento {
+  color: var(--lapiz);
+  font-weight: 700;
+}
+
+/* ======================= VENTAS: MARCAS DE CORRECCIÓN Y REEMBOLSO ======================= */
+
+/* Etiquetas (Corregida, Reembolso parcial...) dentro de cada fila del historial */
+.venta-fila-marcas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+/* Etiquetas del encabezado del detalle, una al lado de la otra */
+.detalle-etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+/* Franja que dice quién corrigió la venta y cuándo */
+.marca-correccion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-left: 6px solid var(--aviso);
+  border-radius: var(--radio-chico);
+  background: var(--aviso-suave);
+  font-weight: 700;
+}
+
+/* Bloque con los reembolsos de la venta */
+.reembolsos {
+  margin-top: 16px;
+}
+
+/* Controles de una línea al reembolsar o corregir: cantidad y casilla, en fila */
+.reembolso-controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Número de la cantidad cuando no es un campo editable (solo se cambia con − y +) */
+.cantidad-fija {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Fila de botones alineada a la izquierda (por defecto van a la derecha) */
+.acciones-izquierda {
+  justify-content: flex-start;
+}
+
+/* Selector de dos opciones (tipo de faltante): mismas piezas del método de pago, en dos columnas */
+.selector-doble {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* ======================= FACTURA: CORRECCIÓN Y REEMBOLSOS ======================= */
+
+/* Marca visible en la factura (venta corregida / venta con reembolsos) */
+.factura-marca {
+  margin: 8px 0;
+  padding: 6px 8px;
+  border: 1px dashed var(--tinta-suave);
+  border-radius: var(--radio-chico);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.factura-reembolsos {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 0.875rem;
+}
+
+.factura-reembolso-linea {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-left: 10px;
+}
+
+.factura-reembolsos .factura-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 1rem;
+}
+
+/* ======================= FILTROS (FALTANTES Y REPORTES) ======================= */
+
+/* Los filtros van uno debajo del otro en el celular */
+.filtros {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+/* Botones de rango rápido (Hoy, Últimos 7 días...) */
+.filtros-rapidos {
+  margin: 0;
+  padding: 0;
+}
+
+/* Botones de un faltante (Resuelto / Reabrir y eliminar), uno debajo del otro */
+.gestion-botones-columna {
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+/* ======================= REPORTES ======================= */
+
+/* Las cuatro pestañas de reportes llevan texto más pequeño para caber en el celular */
+.pestanas-reporte .pestana {
+  padding: 0 6px;
+  font-size: 0.875rem;
+}
+
+.reporte {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Tarjetas con las cifras principales: dos por fila en el celular */
+.tarjetas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.tarjeta {
+  padding: 14px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-medio);
+  background: var(--papel);
+}
+
+/* La tarjeta principal ocupa toda la fila y se resalta con el amarillo de la marca */
+.tarjeta-principal {
+  grid-column: 1 / -1;
+  border-color: transparent;
+  background: var(--luna-suave);
+}
+
+.tarjeta-titulo {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--tinta-suave);
+}
+
+.tarjeta-valor {
+  font-size: 1.375rem;
+  font-weight: 700;
+}
+
+.tarjeta-principal .tarjeta-valor {
+  font-size: 2rem;
+}
+
+.tarjeta-nota {
+  font-size: 0.8125rem;
+  color: var(--tinta-suave);
+}
+
+/* Caja de una tabla: si la tabla es más ancha que el celular, se desplaza de lado
+   dentro de esta caja (la página completa no se mueve) */
+.tabla-caja {
+  overflow-x: auto;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-medio);
+  background: var(--papel);
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla th,
+.tabla td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--linea);
+  text-align: left;
+}
+
+.tabla th {
+  font-size: 0.8125rem;
+  color: var(--tinta-suave);
+  white-space: nowrap;
+}
+
+/* La última fila no lleva línea debajo */
+.tabla tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Columnas de números: alineadas a la derecha para comparar cifras fácilmente */
+.tabla .tabla-numero {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Lista de productos más vendidos, con una barra proporcional */
+.ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ranking-fila {
+  padding: 12px 14px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-medio);
+  background: var(--papel);
+}
+
+.ranking-textos {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 700;
+}
+
+/* Riel gris de la barra y su relleno amarillo (el ancho lo pone React según las unidades) */
+.ranking-barra {
+  height: 10px;
+  margin: 8px 0 6px;
+  border-radius: var(--radio-pildora);
+  background: var(--linea);
+}
+
+.ranking-relleno {
+  height: 100%;
+  border-radius: var(--radio-pildora);
+  background: var(--luna);
+}
+
+/* Grupo de faltantes pendientes de un mismo proveedor */
+.grupo-proveedor {
+  padding: 12px 14px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-medio);
+  background: var(--papel);
+}
+
+.grupo-proveedor-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+/* ======================= TABLET (640px o más) ======================= */
+@media (min-width: 640px) {
+  /* Hay espacio: se muestra el nombre del usuario junto al botón de salir */
+  .encabezado-usuario {
+    display: flex;
+  }
+
+  /* Los filtros se ponen en una sola fila */
+  .filtros {
+    grid-template-columns: repeat(3, 1fr);
+    align-items: end;
+  }
+
+  .filtros-rapidos {
+    grid-column: 1 / -1;
+  }
+
+  /* Cuatro tarjetas en una fila; la principal ocupa dos espacios */
+  .tarjetas {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .tarjeta-principal {
+    grid-column: span 4;
+  }
+
+  .pestanas-reporte .pestana {
+    font-size: 1rem;
+  }
+}
+
+/* ======================= VENTAS EN ESPERA (varios clientes a la vez) ======================= */
+
+/* Franja arriba del catálogo con las ventas guardadas que se pueden retomar */
+.espera {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--linea);
+  border-left: 6px solid var(--esfero);
+  border-radius: var(--radio-medio);
+  background: var(--esfero-suave);
+}
+
+.espera-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--esfero);
+}
+
+/* Los botones van en fila y se desplazan hacia los lados si no caben (como los filtros) */
+.espera-lista {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+/* Cada venta en espera: nombre del cliente, hora y total, uno debajo del otro */
+.espera-venta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  flex: 0 0 auto;
+  min-width: 150px;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-medio);
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: inherit;
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.espera-venta:hover:not(:disabled) {
+  border-color: var(--esfero);
+}
+
+.espera-venta:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.espera-venta-nombre {
+  font-weight: 700;
+}
+
+.espera-venta-detalle {
+  font-size: 0.9rem;
+  color: var(--tinta-suave);
+}
+
+.espera-venta-total {
+  font-weight: 700;
+}

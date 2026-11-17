@@ -1,0 +1,45 @@
+/* ---------------------------------------------------------------------------
+   variables.css: todos los colores, tipografías y medidas en un solo lugar.
+   Si quieres cambiar el "look" de la aplicación, se hace aquí y se actualiza todo.
+   Los colores salen del logo de Papel y Luna (la luna amarilla y el trazo oscuro)
+   y de los útiles de la papelería: esfero azul, lápiz verde y borrador rojo.
+   --------------------------------------------------------------------------- */
+:root {
+  /* Marca */
+  --luna: #f6c61a;            /* el amarillo real de la luna del logo: acción principal */
+  --luna-fuerte: #e0ae08;     /* amarillo un poco más oscuro: al presionar un botón */
+  --luna-suave: #fff3c4;      /* amarillo muy claro: fondos de resalte */
+
+  /* Texto y fondos */
+  --tinta: #1f2a44;           /* azul tinta de esfero: texto principal */
+  --tinta-suave: #556080;     /* texto secundario */
+  --hoja: #f4f6fa;            /* fondo de la página */
+  --papel: #ffffff;           /* fondo de tarjetas, recibo y ventanas */
+  --linea: #dce1ec;           /* bordes y separadores */
+
+  /* Significados de color */
+  --esfero: #2f5ba8;          /* azul: información y selección */
+  --esfero-suave: #e4ecf9;
+  --lapiz: #1f7a4a;           /* verde: éxito y cambio a devolver */
+  --lapiz-suave: #ddf3e6;
+  --borrador: #b83a30;        /* rojo: peligro y errores */
+  --borrador-suave: #fbe4e1;
+  --aviso: #8f5a0a;           /* ámbar oscuro: poco stock */
+  --aviso-suave: #fff0d2;
+
+  /* Tipografías: Atkinson para leer cifras sin confundirlas, Patrick Hand (a mano) solo en títulos */
+  --fuente-texto: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fuente-titulo: "Patrick Hand", "Atkinson Hyperlegible", system-ui, sans-serif;
+
+  /* Radios: cada nivel tiene su redondeo (botones y etiquetas más redondos que las tarjetas) */
+  --radio-chico: 8px;
+  --radio-medio: 14px;
+  --radio-grande: 22px;
+  --radio-pildora: 999px;
+
+  /* Sombra solo para lo que "flota" encima de todo (ventanas, avisos, barras) */
+  --sombra-flota: 0 8px 28px rgba(31, 42, 68, 0.2);
+
+  /* Medidas */
+  --alto-navegacion: 66px;
+}

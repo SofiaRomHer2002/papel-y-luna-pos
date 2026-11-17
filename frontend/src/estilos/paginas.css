@@ -1,0 +1,915 @@
+/* ---------------------------------------------------------------------------
+   paginas.css: la estructura general y el diseño de cada pantalla.
+   Se escribe primero para CELULAR (lo que se ve sin ninguna media query) y luego
+   se agregan reglas para pantallas más grandes con @media (min-width: ...):
+     640px  = tablet pequeña
+     900px  = tablet grande / computador (la venta pasa a dos columnas)
+   --------------------------------------------------------------------------- */
+
+/* ======================= ESTRUCTURA GENERAL ======================= */
+
+/* La aplicación ocupa toda la altura de la pantalla: encabezado, menú y contenido */
+.aplicacion {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+/* Encabezado: blanco, con el logo, y una franja amarilla debajo (el color de la luna) */
+.encabezado {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+  background: var(--papel);
+  border-bottom: 4px solid var(--luna);
+}
+
+.encabezado-logo {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+}
+
+.encabezado-negocio {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--tinta-suave);
+}
+
+.encabezado-titulo {
+  font-size: 1.7rem;
+}
+
+/* Menú principal: en el celular queda fijo abajo, donde llega el pulgar */
+.navegacion {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 30;
+  display: grid;
+  /* Una columna por cada botón, todas del mismo ancho (el administrador ve 5 y el cajero 4) */
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--papel);
+  border-top: 1px solid var(--linea);
+  box-shadow: 0 -4px 16px rgba(31, 42, 68, 0.08);
+}
+
+.nav-boton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: var(--alto-navegacion);
+  padding: 6px 2px;
+  border: 0;
+  background: transparent;
+  color: var(--tinta-suave);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* El icono vive dentro de una "píldora" que se pinta de amarillo en la opción activa */
+.nav-icono {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 32px;
+  border-radius: var(--radio-pildora);
+}
+
+.nav-boton-activo {
+  color: var(--tinta);
+}
+
+.nav-boton-activo .nav-icono {
+  background: var(--luna);
+}
+
+/* Globito con las unidades de la venta en curso */
+.nav-globo {
+  position: absolute;
+  top: -4px;
+  right: 2px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: var(--radio-pildora);
+  background: var(--tinta);
+  color: #ffffff;
+  font-size: 0.75rem;
+  line-height: 20px;
+  text-align: center;
+}
+
+/* Contenido: deja espacio abajo para que el menú fijo no tape nada */
+.contenido {
+  flex: 1;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px 16px calc(var(--alto-navegacion) + 32px + env(safe-area-inset-bottom));
+}
+
+/* Una pantalla cualquiera: separa sus bloques con espacio */
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Barra superior de una pantalla: buscador + botón, o pestañas + actualizar */
+.pagina-barra {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagina-barra-acciones {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pagina-subtitulo {
+  flex: 1;
+  font-size: 1.4rem;
+}
+
+/* Buscador: caja con lupa */
+.buscador {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 2px solid var(--linea);
+  border-radius: var(--radio-pildora);
+  background: var(--papel);
+  color: var(--tinta-suave);
+}
+
+.buscador:focus-within {
+  border-color: var(--esfero);
+}
+
+.buscador-entrada {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--tinta);
+}
+
+.buscador-entrada:focus {
+  outline: none;
+}
+
+/* Botón "Volver" que aparece arriba en pantallas de detalle */
+.volver-catalogo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0 14px 0 8px;
+  border: 0;
+  border-radius: var(--radio-pildora);
+  background: transparent;
+  color: var(--esfero);
+  font-weight: 700;
+}
+
+.volver-catalogo:hover {
+  background: var(--esfero-suave);
+}
+
+/* ======================= VENTA: CATÁLOGO Y RECIBO ======================= */
+
+.venta-catalogo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* En el celular se ve un panel a la vez: el catálogo o el recibo */
+.panel-catalogo .venta-recibo {
+  display: none;
+}
+
+.panel-venta .venta-catalogo {
+  display: none;
+}
+
+/* La barra flotante solo se ve en el panel del catálogo; en el recibo taparía los botones de cobrar */
+.panel-venta .barra-venta {
+  display: none;
+}
+
+/* Lista de productos: filas separadas por líneas, como una lista de precios */
+.lista-productos {
+  display: flex;
+  flex-direction: column;
+  background: var(--papel);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-medio);
+}
+
+.producto-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 14px;
+  border-bottom: 1px solid var(--linea);
+}
+
+.producto-fila:last-child {
+  border-bottom: 0;
+}
+
+.producto-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.producto-nombre {
+  font-weight: 700;
+  font-size: 1.0625rem;
+  overflow-wrap: anywhere;
+}
+
+.producto-detalle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 2px;
+  font-size: 0.875rem;
+  color: var(--tinta-suave);
+}
+
+/* El código del producto se ve más suave, con otra letra */
+.producto-codigo {
+  color: var(--tinta-suave);
+  font-size: 0.8125rem;
+  opacity: 0.85;
+}
+
+.producto-etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.producto-etiquetas:empty {
+  display: none;
+}
+
+.producto-lado {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.producto-precio {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.producto-botones {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.producto-botones .boton {
+  min-height: 44px;
+  padding: 0 16px;
+}
+
+/* ---- El recibo: la venta en curso, con aspecto de ticket de papel ---- */
+.venta-recibo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recibo {
+  padding: 18px 16px;
+  background: var(--papel);
+  border: 1px solid var(--linea);
+  border-top: 5px dashed var(--tinta);
+  border-radius: var(--radio-medio);
+}
+
+.recibo-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 2px dashed var(--linea);
+}
+
+.recibo-titulo {
+  font-size: 1.7rem;
+}
+
+.recibo-vacio {
+  padding: 28px 8px;
+  text-align: center;
+  color: var(--tinta-suave);
+}
+
+/* Cada línea del recibo: nombre, cantidad, subtotal y botón de quitar (en dos filas en el celular) */
+.recibo-linea {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "info info borrar"
+    "cantidad espacio subtotal";
+  align-items: center;
+  gap: 8px 10px;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--linea);
+}
+
+.recibo-linea-info {
+  grid-area: info;
+  min-width: 0;
+}
+
+.recibo-linea-nombre {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.recibo-linea-precio {
+  font-size: 0.875rem;
+  color: var(--tinta-suave);
+}
+
+.recibo-linea .cantidad {
+  grid-area: cantidad;
+}
+
+.recibo-linea-subtotal {
+  grid-area: subtotal;
+  font-size: 1.0625rem;
+  font-weight: 700;
+}
+
+.recibo-linea > .boton-icono {
+  grid-area: borrar;
+}
+
+.recibo-linea-error {
+  background: var(--borrador-suave);
+}
+
+/* Contador de cantidad: − [número] + */
+.cantidad {
+  display: inline-flex;
+  align-items: center;
+  border: 2px solid var(--linea);
+  border-radius: var(--radio-pildora);
+  background: var(--papel);
+}
+
+.cantidad-boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radio-pildora);
+  background: transparent;
+}
+
+.cantidad-boton:hover:not(:disabled) {
+  background: var(--luna-suave);
+}
+
+.cantidad-boton:disabled {
+  opacity: 0.4;
+}
+
+.cantidad-numero {
+  width: 48px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-weight: 700;
+  text-align: center;
+}
+
+.cantidad-numero:focus {
+  outline: none;
+  background: var(--luna-suave);
+}
+
+/* Totales del recibo */
+.recibo-totales {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 12px;
+}
+
+.recibo-totales p {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.recibo-total {
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 2px dashed var(--tinta-suave);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.recibo-cliente {
+  margin-top: 16px;
+}
+
+.recibo-acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.recibo-acciones .boton-principal {
+  min-height: 56px;
+  font-size: 1.125rem;
+}
+
+/* Barra que flota sobre el menú en el celular: resumen de la venta + botón para verla */
+.barra-venta {
+  position: fixed;
+  right: 12px;
+  bottom: calc(var(--alto-navegacion) + 12px + env(safe-area-inset-bottom));
+  left: 12px;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 56px;
+  padding: 0 8px 0 18px;
+  border: 0;
+  border-radius: var(--radio-pildora);
+  background: var(--tinta);
+  box-shadow: var(--sombra-flota);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.barra-venta-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.barra-venta-total {
+  flex: 1;
+  text-align: right;
+  font-size: 1.125rem;
+}
+
+.barra-venta-accion {
+  padding: 12px 18px;
+  border-radius: var(--radio-pildora);
+  background: var(--luna);
+  color: var(--tinta);
+}
+
+/* ======================= HISTORIAL Y COMPRAS ======================= */
+
+/* Pestañas Abiertas / Cerradas: separan la información */
+.pestanas {
+  display: flex;
+  flex: 1;
+  padding: 4px;
+  border-radius: var(--radio-pildora);
+  background: var(--linea);
+}
+
+.pestana {
+  flex: 1;
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--radio-pildora);
+  background: transparent;
+  color: var(--tinta-suave);
+  font-weight: 700;
+}
+
+.pestana-activa {
+  background: var(--papel);
+  color: var(--tinta);
+  box-shadow: 0 1px 4px rgba(31, 42, 68, 0.15);
+}
+
+.pestana-numero {
+  display: inline-block;
+  min-width: 22px;
+  padding: 0 6px;
+  margin-left: 4px;
+  border-radius: var(--radio-pildora);
+  background: var(--luna);
+  color: var(--tinta);
+  font-size: 0.8125rem;
+}
+
+/* Lista de ventas o compras: cada fila es un botón que abre el detalle */
+.lista-ventas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.venta-fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 14px 14px 16px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-medio);
+  background: var(--papel);
+  text-align: left;
+}
+
+.venta-fila:hover {
+  border-color: var(--tinta);
+}
+
+.venta-fila-textos {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.venta-fila-titulo {
+  font-weight: 700;
+}
+
+.venta-fila-detalle {
+  font-size: 0.875rem;
+  color: var(--tinta-suave);
+}
+
+.venta-fila-total {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+/* Detalle de una venta o compra: una hoja con sus datos */
+.detalle {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 16px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-medio);
+  background: var(--papel);
+}
+
+.detalle-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.detalle-titulo {
+  font-size: 1.6rem;
+}
+
+.detalle-fecha {
+  color: var(--tinta-suave);
+}
+
+.detalle-datos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  padding: 12px 0;
+  border-top: 2px dashed var(--linea);
+  border-bottom: 2px dashed var(--linea);
+}
+
+.detalle-datos dt {
+  font-size: 0.8125rem;
+  color: var(--tinta-suave);
+}
+
+.detalle-datos dd {
+  font-weight: 700;
+}
+
+.detalle-lineas {
+  display: flex;
+  flex-direction: column;
+}
+
+.detalle-lineas li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--linea);
+}
+
+.detalle-lineas-nota {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--tinta-suave);
+}
+
+/* ======================= PRODUCTOS, CATEGORÍAS, PROVEEDORES, CLIENTES ======================= */
+
+.lista-gestion {
+  display: flex;
+  flex-direction: column;
+  background: var(--papel);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-medio);
+}
+
+.gestion-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 8px 14px 16px;
+  border-bottom: 1px solid var(--linea);
+}
+
+.gestion-fila:last-child {
+  border-bottom: 0;
+}
+
+.gestion-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.gestion-nombre {
+  font-weight: 700;
+  font-size: 1.0625rem;
+  overflow-wrap: anywhere;
+}
+
+.gestion-detalle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  font-size: 0.875rem;
+  color: var(--tinta-suave);
+  overflow-wrap: anywhere;
+}
+
+.gestion-botones {
+  display: flex;
+  flex-shrink: 0;
+}
+
+/* Menú "Más": tres opciones grandes */
+.menu-mas {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.menu-mas-opcion {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-medio);
+  background: var(--papel);
+  text-align: left;
+}
+
+.menu-mas-opcion:hover {
+  border-color: var(--tinta);
+}
+
+.menu-mas-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--luna-suave);
+}
+
+.menu-mas-textos {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.menu-mas-titulo {
+  font-family: var(--fuente-titulo);
+  font-size: 1.4rem;
+}
+
+.menu-mas-descripcion {
+  font-size: 0.875rem;
+  color: var(--tinta-suave);
+}
+
+.menu-mas-cantidad {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--tinta-suave);
+}
+
+/* ======================= COMPRAS: FORMULARIO ======================= */
+
+.resultados-busqueda {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--linea);
+  border-radius: var(--radio-medio);
+  overflow: hidden;
+}
+
+.resultado {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--linea);
+  background: var(--papel);
+  text-align: left;
+  font-weight: 700;
+}
+
+.resultados-busqueda li:last-child .resultado {
+  border-bottom: 0;
+}
+
+.resultado:hover {
+  background: var(--luna-suave);
+}
+
+.resultado-detalle {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--tinta-suave);
+}
+
+.lineas-compra {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.linea-compra {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-medio);
+  background: var(--hoja);
+}
+
+.linea-compra-nombre {
+  font-weight: 700;
+}
+
+.linea-compra-campos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.linea-compra-pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.linea-compra-subtotal {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+/* ======================= TABLET (640px o más) ======================= */
+@media (min-width: 640px) {
+  .contenido {
+    padding: 24px 24px calc(var(--alto-navegacion) + 32px);
+  }
+
+  .encabezado {
+    padding-right: 24px;
+    padding-left: 24px;
+  }
+
+  .chips {
+    margin: 0;
+    padding: 2px 0 6px;
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
+  .lista-ventas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .menu-mas {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .menu-mas-opcion {
+    flex-wrap: wrap;
+  }
+}
+
+/* ======================= COMPUTADOR / TABLET GRANDE (900px o más) ======================= */
+@media (min-width: 900px) {
+  /* El menú sube y se convierte en pestañas debajo del encabezado */
+  .navegacion {
+    position: sticky;
+    top: 82px;
+    z-index: 19;
+    grid-auto-columns: 150px;
+    justify-content: center;
+    padding-bottom: 0;
+    box-shadow: none;
+    border-top: 0;
+    border-bottom: 1px solid var(--linea);
+  }
+
+  .nav-boton {
+    flex-direction: row;
+    gap: 8px;
+    min-height: 54px;
+    font-size: 0.9375rem;
+  }
+
+  .nav-icono {
+    width: 36px;
+    height: 36px;
+  }
+
+  .contenido {
+    padding-bottom: 40px;
+  }
+
+  /* La venta muestra catálogo y recibo lado a lado */
+  .venta-pantalla {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 390px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .panel-catalogo .venta-recibo,
+  .panel-venta .venta-catalogo {
+    display: flex;
+  }
+
+  /* El recibo se queda a la vista mientras se recorre el catálogo */
+  .venta-recibo {
+    position: sticky;
+    top: 150px;
+  }
+
+  /* En computador no hacen falta los botones de ir y volver entre paneles */
+  .venta-recibo .volver-catalogo,
+  .barra-venta {
+    display: none;
+  }
+}
