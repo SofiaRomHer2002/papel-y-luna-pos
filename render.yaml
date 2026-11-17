@@ -12,6 +12,6 @@ services:
     runtime: python
     plan: free
     rootDir: backend
-    buildCommand: bash build.sh && python manage.py migrate --noinput
+    buildCommand: bash build.sh && python manage.py migrate --noinput && python manage.py inicializar_datos --solo-usuarios
     startCommand: gunicorn papelyluna.wsgi:application --bind 0.0.0.0:$PORT --access-logfile - --error-logfile -
     healthCheckPath: /health/
