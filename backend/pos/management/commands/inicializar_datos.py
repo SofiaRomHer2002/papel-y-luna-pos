@@ -8,9 +8,12 @@
 # Se puede ejecutar varias veces sin problema: no duplica nada.
 # Con "--solo-usuarios" crea únicamente los usuarios (sin datos de ejemplo).
 # ---------------------------------------------------------------------------
-from django.core.management.base import BaseCommand
+import os
 
-from pos.models import Categoria, Cliente, Descuento, Producto, Proveedor, Usuario
+from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
+
+from pos.models import Categoria, Cliente, Descuento, Producto, Proveedor, Sesion, Usuario
 
 # Usuarios iniciales: (usuario, contraseña, rol, nombre para mostrar)
 USUARIOS = [
@@ -67,9 +70,13 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--solo-usuarios", action="store_true", help="Crea solo los usuarios, sin datos de ejemplo.")
+        parser.add_argument("--restablecer-claves", action="store_true", help="Recuperación explícita: exige INITIAL_ADMIN_PASSWORD e INITIAL_CASHIER_PASSWORD y revoca sus sesiones.")
 
     def handle(self, *args, **opciones):
-        self.crear_usuarios()
+        restablecer = opciones["restablecer_claves"]
+        if restablecer and not all(os.environ.get(nombre) for nombre in ("INITIAL_ADMIN_PASSWORD", "INITIAL_CASHIER_PASSWORD")):
+            raise CommandError("Para restablecer claves define INITIAL_ADMIN_PASSWORD e INITIAL_CASHIER_PASSWORD. No se cambió ningún usuario.")
+        self.crear_usuarios(restablecer)
 
         if opciones["solo_usuarios"]:
             self.stdout.write("Se omitieron los datos de ejemplo (--solo-usuarios).")
@@ -81,18 +88,24 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("Listo. Ya puedes iniciar sesión."))
 
-    def crear_usuarios(self):
+    @transaction.atomic
+    def crear_usuarios(self, restablecer=False):
         for nombre_usuario, clave, rol, nombre in USUARIOS:
-            usuario = Usuario.objects.filter(username=nombre_usuario).first()
-            if usuario is None:
-                usuario = Usuario(username=nombre_usuario)
+            variable = "INITIAL_ADMIN_PASSWORD" if rol == "administrador" else "INITIAL_CASHIER_PASSWORD"
+            # Una transacción y username único impiden duplicados en deploys simultáneos.
+            with transaction.atomic():
+                usuario, creado = Usuario.objects.get_or_create(
+                    username=nombre_usuario, defaults={"rol": rol, "nombre": nombre},
+                )
+                if creado or restablecer:
+                    usuario.set_password(os.environ.get(variable) or clave)
+                    usuario.save(update_fields=["password"])
+                    if restablecer:
+                        Sesion.objects.filter(usuario=usuario).delete()
+            estado = "Clave restablecida: " if restablecer else ("Usuario creado: " if creado else "Usuario existente, sin cambios: ")
+            self.stdout.write(estado + nombre_usuario + " (" + usuario.rol + ")")
 
-            usuario.rol = rol
-            usuario.nombre = nombre
-            usuario.set_password(clave)  # set_password guarda la contraseña CIFRADA (nunca en texto)
-            usuario.save()
-            self.stdout.write("Usuario listo: " + nombre_usuario + " (" + rol + ")")
-
+    @transaction.atomic
     def cargar_catalogo(self):
         for identificador, nombre in CATEGORIAS:
             Categoria.objects.create(id=identificador, nombre=nombre)

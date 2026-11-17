@@ -1,120 +1,162 @@
-# Desplegar Papel y Luna en Render
+# Papel y Luna en Render
 
-## Archivos y decisiones
+## Aplicar la corrección
 
-La estructura real es Django + PostgreSQL (no SQLite, DRF ni JWT) y React/Vite.
-Se conservan modelos, migraciones, controladores, tokens propios y frontend.
-Se conserva psycopg[binary] 3, compatible con Django: no se instala también
-psycopg2-binary. Se conserva python-dotenv: no hace falta python-decouple.
-Se agregan Gunicorn, dj-database-url y WhiteNoise.
+Integra esta rama en `main`. Si creaste los servicios con un Blueprint, sincroniza
+ese Blueprint con el `render.yaml` actualizado. Un push por sí solo no garantiza
+que Render aplique cambios de variables o comandos de un servicio creado manualmente.
 
-DEBUG es False por defecto. SECRET_KEY es obligatoria en producción.
-Los nombres SECRET_KEY, DEBUG y ALLOWED_HOSTS tienen prioridad sobre sus alias
-DJANGO_SECRET_KEY, DJANGO_DEBUG y DJANGO_ALLOWED_HOSTS, que siguen funcionando.
-DATABASE_URL tiene prioridad sobre DB_*. Las conexiones por URL requieren SSL
-por defecto en producción; para un PostgreSQL local sin SSL se puede configurar
-DATABASE_SSL_REQUIRE=False. En Render no cambies ese valor.
-El hostname asignado por Render se agrega automáticamente a ALLOWED_HOSTS.
-CORS solo permite todos los orígenes cuando DEBUG=True y CORS_ORIGENES está vacío.
+El Blueprint declara PostgreSQL 16 (`papelyluna-db`), Django (`papelyluna-api`,
+plan Free) y un Static Site React (`papelyluna-web`). Conserva también el workflow
+existente de GitHub Pages. No se contratan planes de pago en este archivo.
 
-## 1. Preparar el repositorio
+Si ya tienes servicios creados manualmente, actualiza los existentes; no crees
+otra base si quieres conservar los datos. Configura en el servicio Django:
 
-Descomprime el ZIP. Sube el CONTENIDO de la carpeta papel-y-luna-pos a la raíz
-del repositorio: render.yaml, backend/, frontend/ y .github/ deben quedar juntos.
-No subas la carpeta contenedora como otro nivel. No se incluye el .env privado
-ni venv, node_modules o archivos compilados. Para trabajar localmente copia
-backend/.env.example a backend/.env; esa plantilla activa DJANGO_DEBUG=True.
+| Campo | Valor |
+| --- | --- |
+| Root Directory | `backend` |
+| Build Command | `bash build.sh` |
+| Start Command | `gunicorn papelyluna.wsgi:application --bind 0.0.0.0:$PORT --access-logfile - --error-logfile -` |
+| Health Check Path | `/health/` |
+| `DEBUG` | `False` |
+| `SECRET_KEY` | Clave aleatoria privada y estable; el Blueprint la genera |
+| `DATABASE_URL` | Internal Database URL de **tu base existente**; el Blueprint la enlaza |
+| `CORS_ORIGENES` | Origen HTTPS real del Static Site; varios separados por comas |
 
-## 2. Crear el Blueprint
+El archivo incluye los orígenes previstos `https://papelyluna-web.onrender.com`
+y `https://sofiaromher2002.github.io`. Si Render asigna otro nombre, un sufijo
+o usas dominio propio, cambia `CORS_ORIGENES` por los orígenes reales. No incluye
+rutas: GitHub Pages usa el origen sin `/papel-y-luna-pos`. No se permiten todos
+los dominios en producción. El hostname del backend se agrega automáticamente
+a `ALLOWED_HOSTS` mediante `RENDER_EXTERNAL_HOSTNAME`; añade dominios propios
+en `ALLOWED_HOSTS` si corresponde. No cambies `SECRET_KEY` en cada despliegue.
 
-En Render selecciona New > Blueprint y conecta el repositorio.
-Render leerá render.yaml y creará PostgreSQL 16 y el servicio Python.
-Este Blueprint usa planes DE PAGO: web 0.5c-512mb y PostgreSQL 0.1c-256mb.
-Revisa los cargos que muestre Render antes de confirmar. No se han creado
-servicios ni contratado recursos desde esta tarea.
+Para el Static Site:
 
-Cuando Render solicite CORS_ORIGENES, introduce el origen HTTPS del frontend,
-por ejemplo https://usuario.github.io (sin ruta del repositorio ni barra final).
-Para varios orígenes usa comas. No lo dejes vacío si vas a conectar el frontend.
-SECRET_KEY se genera automáticamente y DATABASE_URL se enlaza con la base.
+| Campo | Valor |
+| --- | --- |
+| Root Directory | `frontend` |
+| Build Command | `npm ci && npm run build` |
+| Publish Directory | `dist` |
+| `VITE_API_URL` | `https://papelyluna-api.onrender.com/api` (sustituye por tu API real) |
 
-El build instala dependencias y ejecuta collectstatic. Antes de cada despliegue
-se ejecuta migrate --noinput. Gunicorn sirve papelyluna.wsgi:application en $PORT.
-El chequeo /health/ devuelve {"status":"ok"}; comprueba que Django responde,
-no la disponibilidad de PostgreSQL. Las migraciones sí requieren conexión real.
-La base solo permite conexiones internas de Render por defecto.
+La dirección se normaliza para incluir `/api` una sola vez. Un build de producción
+rechaza direcciones HTTP. Sin variable usa la API Render prevista, nunca
+`http://<sitio-estatico>:8000`. Si cambias `VITE_API_URL`, reconstruye el frontend:
+Vite incorpora su valor durante el build. Revisa también `.env` o `.env.production`
+privados: un valor `localhost` de desarrollo no sirve para el build de producción.
 
-## 3. Usuarios y datos iniciales
+En GitHub Pages define la variable de Actions `VITE_API_URL` con la URL HTTPS real
+de la API y vuelve a ejecutar `Publicar en GitHub Pages`. Su ruta de login es
+`POST /api/sesion`, con JSON `{"usuario":"...","clave":"..."}`.
 
-Las migraciones crean tablas pero no usuarios del negocio. En la Shell de Render,
-desde backend, ejecuta una vez:
+## Migraciones y usuarios
 
-    python manage.py inicializar_datos --solo-usuarios
+`build.sh` instala dependencias, recoge estáticos, ejecuta las migraciones y llama
+a `inicializar_datos --solo-usuarios`. Se hace en el build para ser compatible con
+Render Free; no requiere Shell, One-Off Jobs ni un comando previo al despliegue.
+Si falla una etapa, se detiene el build.
 
-Para incluir también el catálogo de demostración omite --solo-usuarios.
-El comando original contiene contraseñas de ejemplo publicadas en README.md.
-Antes de dar acceso público, cambia las contraseñas de AMBOS usuarios desde la shell:
+En una base nueva se crean:
 
-    python manage.py shell
+| Usuario | Contraseña inicial predeterminada | Rol |
+| --- | --- | --- |
+| `Admin_PapelyLuna` | `Admin_12345!` | administrador |
+| `Cajero_PapelyLuna` | `Cajero_12345!` | cajero |
 
-    from getpass import getpass
-    from pos.models import Usuario
-    for nombre in ("Admin_PapelyLuna", "Cajero_PapelyLuna"):
-        usuario = Usuario.objects.get(username=nombre)
-        usuario.set_password(getpass(f"Nueva contraseña para {nombre}: "))
-        usuario.save(update_fields=["password"])
+Para usar contraseñas privadas desde el primer despliegue, define
+`INITIAL_ADMIN_PASSWORD` e `INITIAL_CASHIER_PASSWORD` en el backend antes del build.
+No publiques esos valores en Git. Si el usuario ya existe, el comando normal
+**no modifica contraseña, nombre, rol ni estado activo**, aunque cambien esas
+variables. No se reviven cuentas desactivadas. Los tokens de usuarios desactivados
+se rechazan. La creación de usuarios es transaccional y no duplica usernames.
 
-La carga de ejemplos se mantiene manual y no se ejecuta en cada despliegue.
-Una base nueva no contiene tus ventas previas: este ZIP contiene código,
-no una copia de la base de datos anterior.
+No se cargan productos ni ventas de demostración automáticamente. El catálogo
+manual se carga con `python manage.py inicializar_datos`, dentro de una transacción,
+y se omite si ya existen productos o categorías. Una base nueva no contiene las
+ventas guardadas en otra base ni importa automáticamente el SQLite del repositorio.
 
-## 4. Conectar el frontend existente
+### Recuperar contraseñas existentes solo si hace falta
 
-Se conserva el despliegue de GitHub Pages definido en .github/workflows/desplegar.yml.
-En GitHub configura Settings > Pages > Source = GitHub Actions.
-En Settings > Secrets and variables > Actions > Variables define:
+Si el login devuelve 401 y no recuerdas las claves existentes, configura **ambas**
+variables privadas anteriores con las claves que quieres usar. En Render Free,
+cambia temporalmente el Build Command del backend a:
 
-    VITE_API_URL=https://TU-API.onrender.com/api
+```bash
+bash build.sh && python manage.py inicializar_datos --solo-usuarios --restablecer-claves
+```
 
-Incluye /api y no agregues barra al final. Vuelve a ejecutar el workflow para
-reconstruir el frontend. En Render CORS_ORIGENES debe coincidir con su origen.
-Si tienes dominio propio, añade el hostname de la API a ALLOWED_HOSTS y el origen
-del frontend a CORS_ORIGENES. CSRF_TRUSTED_ORIGINS queda disponible si se necesita;
-la API actual usa sus propios tokens y no se cambia su autenticación.
+Despliega una vez. El restablecimiento exige ambas variables, revoca los tokens
+de esos dos usuarios y conserva sus roles y su estado activo. Verifica el acceso
+y vuelve a dejar el Build Command en `bash build.sh`. Sin el indicador explícito,
+los futuros deploys nunca vuelven a aplicar las claves iniciales. Si necesitas
+conservar las claves de una base existente, no ejecutes esta recuperación.
 
-## 5. Comprobar
+## CORS y CSRF
 
-Abre https://TU-API.onrender.com/health/ y espera status ok. La raíz / no tiene
-página y puede devolver 404: es una API. Abre el frontend e inicia sesión; comprueba
-catálogo, registro de una venta de prueba y consulta del historial.
-WhiteNoise sirve archivos estáticos de Django bajo /static/; el frontend React
-se construye y publica por separado. Actualmente no hay estáticos de Django,
-por lo que collectstatic puede informar 0 archivos copiados.
+La autenticación usa tokens propios enviados como `Authorization: Bearer ...`,
+sin cookies de sesión. El frontend no necesita `credentials: include` ni obtener
+una cookie CSRF. CORS permite el origen configurado y el preflight con Authorization
+y Content-Type. `CSRF_TRUSTED_ORIGINS` sigue disponible para una futura función con
+cookies; no reemplaza `CORS_ORIGENES` ni resuelve por sí sola el login actual.
+No se ha agregado autenticación por cookies ni desactivado una protección existente.
 
-## Referencias oficiales
+## Desarrollo local
 
-- https://render.com/docs/deploy-django
-- https://render.com/docs/blueprint-spec
-- https://render.com/docs/python-version
+Copia `backend/.env.example` a `backend/.env`, configura PostgreSQL local y ejecuta
+las migraciones y `inicializar_datos`. `DB_*` y los alias `DJANGO_*` siguen funcionando.
+`DATABASE_URL` tiene prioridad; en Render es obligatoria. SSL se exige por defecto
+en producción. Para PostgreSQL local por URL sin SSL usa `DATABASE_SSL_REQUIRE=False`.
 
-## Validación realizada
+Con `npm run dev`, sin `VITE_API_URL`, se usa `http://<computador>:8000/api`.
+La plantilla `frontend/.env.example` conserva una dirección local explícita.
 
-- Python 3.14.7; instalación limpia de requirements.txt y pip check sin conflictos.
-- Django check: sin incidencias. WSGI importa correctamente con DEBUG=False.
-- collectstatic: correcto (0 archivos; el frontend se publica por separado).
-- DATABASE_URL selecciona PostgreSQL y SSL; hostname de Render permitido.
-- Probados /health/, redirección HTTPS, rechazo de hosts ajenos, CORS permitido
-  y denegado, y validación de petición de login. Sin SECRET_KEY, producción falla
-  con un mensaje claro, como se espera.
-- Migraciones, ausencia de cambios pendientes de modelos, carga inicial y login
-  original (HTTP 201) comprobados con SQLite temporal en memoria, solo para esta
-  prueba. No se ha modificado la configuración de producción para usar SQLite.
-- render.yaml se analizó como YAML y se comprobaron rutas y referencia a la base.
-- check --deploy termina con dos advertencias: CSRF middleware ausente (la API
-  existente usa tokens Bearer propios, sin cookies de sesión) y HSTS sin activar.
-  Se conserva la autenticación original; no se silencian esas advertencias.
-- No se probó conexión ni migración en un servidor PostgreSQL real, ni arranque
-  de Gunicorn en Linux/Render (la validación local se hizo en Windows).
+## Validar
 
-La prueba final en Render debe confirmar migraciones, inicio de sesión y una
-venta completa. La preparación del ZIP no equivale a un despliegue realizado.
+```powershell
+# Desde la raíz del repo, después de instalar backend/requirements.txt
+python backend/manage.py test pos --settings=papelyluna.test_settings
+python backend/manage.py makemigrations --check --dry-run --settings=papelyluna.test_settings
+cd frontend
+npm ci
+npm test
+npm run lint
+npm run build
+```
+
+Las pruebas locales usan SQLite en memoria exclusivamente en `test_settings`;
+no cambian la base local ni la configuración de PostgreSQL de producción.
+El workflow `Validar aplicación` ejecuta las mismas pruebas del backend sobre
+PostgreSQL 16 en Linux y compila el frontend en Node 22.
+
+Después del despliegue, abre `/health/` y comprueba el login desde el Static Site,
+el catálogo y una venta. `/health/` comprueba que Django responde, no la base de datos.
+La raíz `/` del backend puede devolver 404: el frontend se publica por separado.
+El timeout del frontend es de 90 segundos para tolerar el arranque tras inactividad.
+
+Render Free suspende el backend tras inactividad y su PostgreSQL gratuito expira
+a los 30 días; conserva copias de tus datos y elige un plan adecuado para operación real.
+Consulta [limitaciones Free](https://render.com/docs/free),
+[Blueprint](https://render.com/docs/blueprint-spec) y
+[Django en Render](https://render.com/docs/deploy-django).
+
+Las verificaciones locales y CI no equivalen a haber desplegado ni a haber
+comprobado las variables privadas y la base que están actualmente en tu cuenta Render.
+
+## Resultado de la revisión (17 de noviembre de 2026)
+
+- 13 pruebas backend aprobadas sobre SQLite temporal: login inicial, claves
+  personalizadas, conservación del hash, recuperación explícita, sesiones,
+  CORS, configuración de producción, ventas, compras, reportes y permisos.
+- 8 pruebas frontend aprobadas; instalación limpia y build con Vite 8.3.8 correctos.
+- `npm audit`: 0 vulnerabilidades después de actualizar Vite y su lockfile.
+- `makemigrations --check --dry-run`: sin cambios pendientes; `pip check` correcto.
+- `collectstatic` correcto. YAML analizado y referencias del Blueprint comprobadas.
+- `build.sh` normalizado a LF; `.gitattributes` conserva ese formato para Bash en Linux.
+- Lint sin errores, con una advertencia preexistente en `Venta.jsx` sobre un efecto React.
+- No hay PostgreSQL ni Gunicorn Linux disponibles en este equipo Windows.
+  El workflow agregado permite comprobar PostgreSQL 16 en GitHub Actions; no se
+  ejecutó remotamente porque no se pudo publicar la rama con la integración actual.
+- No se modificaron servicios Render ni su base real. La integración GitHub devolvió
+  403 al intentar crear una rama; los cambios se entregan también como ZIP y parche.

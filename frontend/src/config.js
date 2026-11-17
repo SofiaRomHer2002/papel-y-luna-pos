@@ -23,7 +23,8 @@ export const BILLETES_RAPIDOS = [10000, 20000, 50000, 100000];
 export const DURACION_AVISO = 5000;
 
 // Cuánto esperamos la respuesta del backend antes de rendirnos (en milisegundos)
-export const TIEMPO_MAXIMO_ESPERA = 30000;
+// El primer acceso al servicio Free de Render puede tardar cerca de un minuto.
+export const TIEMPO_MAXIMO_ESPERA = 90000;
 
 // Cada cuánto se vuelve a leer el catálogo del backend (en milisegundos).
 // Así, si otra caja vende o el administrador cambia un precio, esta pantalla se entera sola.

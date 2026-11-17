@@ -12,6 +12,31 @@ services:
     runtime: python
     plan: free
     rootDir: backend
-    buildCommand: bash build.sh && python manage.py migrate --noinput && python manage.py inicializar_datos --solo-usuarios
+    buildCommand: bash build.sh
     startCommand: gunicorn papelyluna.wsgi:application --bind 0.0.0.0:$PORT --access-logfile - --error-logfile -
     healthCheckPath: /health/
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.13.5"
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: papelyluna-db
+          property: connectionString
+      - key: CORS_ORIGENES
+        value: https://papelyluna-web.onrender.com,https://sofiaromher2002.github.io
+
+  - type: web
+    name: papelyluna-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: NODE_VERSION
+        value: "22.22.0"
+      - key: VITE_API_URL
+        value: https://papelyluna-api.onrender.com/api
